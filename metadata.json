@@ -1,0 +1,6 @@
+{
+  "name": "ETRA — Hospitality Solutions Boutique",
+  "description": "Piattaforma gestionale e di controllo per l'ospitalità d'élite: Dashboard KPI, Gantt & Task Manager, CRM Clienti & Servizi, Audit Diagnostico a 360°.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
