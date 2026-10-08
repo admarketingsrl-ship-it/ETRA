@@ -17,11 +17,41 @@ export function loadStoredState(): ETRAAppState {
           ...INITIAL_MACRO_TASKS.filter(m => !existingMacroIds.has(m.id)),
         ];
 
+        // Ensure hotel_fasano is fully hydrated with all showcase services and milestones
+        const mergedClients = (parsed.clients as Client[]).map(c => {
+          if (c.id === 'hotel_fasano') {
+            const defaultFasano = INITIAL_CLIENTS.find(ic => ic.id === 'hotel_fasano');
+            if (defaultFasano && (!c.services || c.services.length < 4)) {
+              return {
+                ...defaultFasano,
+                ...c,
+                services: defaultFasano.services,
+                contractMilestones: defaultFasano.contractMilestones,
+              };
+            }
+          }
+          return c;
+        });
+
+        // Ensure hotel_fasano is in clients if not already
+        if (!mergedClients.some(c => c.id === 'hotel_fasano')) {
+          const defaultFasano = INITIAL_CLIENTS.find(ic => ic.id === 'hotel_fasano');
+          if (defaultFasano) mergedClients.unshift(defaultFasano);
+        }
+
+        const mergedAudits = {
+          ...INITIAL_AUDIT_DATA,
+          ...parsed.audits,
+        };
+
         return {
-          clients: parsed.clients,
+          clients: mergedClients,
           macroTasks: mergedMacroTasks,
-          audits: parsed.audits,
-          preventiveAudits: parsed.preventiveAudits || { [INITIAL_PREVENTIVE_AUDIT_FASANO.id]: INITIAL_PREVENTIVE_AUDIT_FASANO },
+          audits: mergedAudits,
+          preventiveAudits: {
+            [INITIAL_PREVENTIVE_AUDIT_FASANO.id]: INITIAL_PREVENTIVE_AUDIT_FASANO,
+            ...(parsed.preventiveAudits || {}),
+          },
           selectedPreventiveAuditId: parsed.selectedPreventiveAuditId || INITIAL_PREVENTIVE_AUDIT_FASANO.id,
           selectedClientId: parsed.selectedClientId || 'all',
           theme: parsed.theme || 'dark',

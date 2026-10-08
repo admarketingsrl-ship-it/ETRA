@@ -309,6 +309,8 @@ export default function App() {
             clients={state.clients}
             macroTasks={state.macroTasks}
             selectedClientId={state.selectedClientId}
+            preventiveAudits={state.preventiveAudits}
+            audits={state.audits}
             onNavigateTab={setActiveTab}
             onSelectClient={handleSelectClient}
           />
