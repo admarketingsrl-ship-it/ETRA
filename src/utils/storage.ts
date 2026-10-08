@@ -1,5 +1,5 @@
 import { Client, MacroTask, ClientAuditData, ETRAAppState } from '../types';
-import { INITIAL_CLIENTS, INITIAL_MACRO_TASKS, INITIAL_AUDIT_DATA } from '../data/initialData';
+import { INITIAL_CLIENTS, INITIAL_MACRO_TASKS, INITIAL_AUDIT_DATA, OFFICIAL_RETAINER_TIERS, AVAILABLE_ETRA_SERVICES } from '../data/initialData';
 import { INITIAL_PREVENTIVE_AUDIT_FASANO } from '../data/preventiveAuditData';
 
 const STORAGE_KEY = 'etra_hospitality_state_v1';
@@ -25,6 +25,8 @@ export function loadStoredState(): ETRAAppState {
           selectedPreventiveAuditId: parsed.selectedPreventiveAuditId || INITIAL_PREVENTIVE_AUDIT_FASANO.id,
           selectedClientId: parsed.selectedClientId || 'all',
           theme: parsed.theme || 'dark',
+          retainerTiers: parsed.retainerTiers || OFFICIAL_RETAINER_TIERS,
+          availableServices: parsed.availableServices || AVAILABLE_ETRA_SERVICES,
         };
       }
     }
@@ -41,6 +43,8 @@ export function loadStoredState(): ETRAAppState {
     selectedPreventiveAuditId: INITIAL_PREVENTIVE_AUDIT_FASANO.id,
     selectedClientId: 'all',
     theme: 'dark',
+    retainerTiers: OFFICIAL_RETAINER_TIERS,
+    availableServices: AVAILABLE_ETRA_SERVICES,
   };
 }
 

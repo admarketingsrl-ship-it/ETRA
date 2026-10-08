@@ -13,7 +13,8 @@ import {
   ClipboardCheck,
   ChevronDown,
   BookOpen,
-  ShieldCheck
+  ShieldCheck,
+  Lock
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -26,6 +27,7 @@ interface HeaderProps {
   toggleTheme: () => void;
   onOpenDataModal: () => void;
   isAutoSaved: boolean;
+  onLogout?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -38,6 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
   toggleTheme,
   onOpenDataModal,
   isAutoSaved,
+  onLogout,
 }) => {
   const [clientDropdownOpen, setClientDropdownOpen] = useState(false);
 
@@ -221,6 +224,18 @@ export const Header: React.FC<HeaderProps> = ({
           >
             {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
+
+          {/* Lock / Logout Button */}
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="flex h-8 items-center gap-1.5 px-2.5 rounded-lg border border-[#223049] bg-[#101726] text-neutral-300 hover:text-amber-400 hover:border-amber-500/50 transition-colors text-xs font-medium cursor-pointer"
+              title="Blocca sessione portale (richiede password ETRA8581)"
+            >
+              <Lock className="h-3.5 w-3.5 text-[#DFBA73]" />
+              <span className="hidden lg:inline text-[11px]">Blocca</span>
+            </button>
+          )}
         </div>
 
       </div>

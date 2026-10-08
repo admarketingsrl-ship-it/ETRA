@@ -220,6 +220,14 @@ export interface Preventive360Audit {
   executiveNotes?: string;
 }
 
+export interface EtraServiceDefinition {
+  id: string;
+  name: string;
+  category: string;
+  defaultMonthlyFee: number;
+  description: string;
+}
+
 export interface ETRAAppState {
   clients: Client[];
   macroTasks: MacroTask[];
@@ -228,4 +236,6 @@ export interface ETRAAppState {
   selectedPreventiveAuditId?: string;
   selectedClientId: string; // 'all' or specific client id
   theme: 'dark' | 'light';
+  retainerTiers?: RetainerTier[];
+  availableServices?: EtraServiceDefinition[];
 }

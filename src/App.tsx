@@ -5,10 +5,13 @@ import {
   MicroTask, 
   Client, 
   ClientAuditData, 
-  SupplierLink 
+  SupplierLink,
+  RetainerTier,
+  EtraServiceDefinition,
+  Preventive360Audit
 } from './types';
 import { loadStoredState, saveStateToStorage } from './utils/storage';
-import { INITIAL_CLIENTS, INITIAL_MACRO_TASKS, INITIAL_AUDIT_DATA } from './data/initialData';
+import { INITIAL_CLIENTS, INITIAL_MACRO_TASKS, INITIAL_AUDIT_DATA, OFFICIAL_RETAINER_TIERS, AVAILABLE_ETRA_SERVICES } from './data/initialData';
 import { Header } from './components/Header';
 import { DashboardView } from './components/DashboardView';
 import { GanttTasksView } from './components/GanttTasksView';
@@ -17,10 +20,19 @@ import { AuditView } from './components/AuditView';
 import { PreventiveAudit360View } from './components/PreventiveAudit360View';
 import { PricingManualView } from './components/PricingManualView';
 import { DataExportModal } from './components/DataExportModal';
+import { LoginGate } from './components/LoginGate';
 import { INITIAL_PREVENTIVE_AUDIT_FASANO } from './data/preventiveAuditData';
-import { Preventive360Audit } from './types';
 
 export default function App() {
+  // Authentication State protected by password "ETRA8581"
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('etra_auth_session') === 'authenticated_ETRA8581';
+    } catch {
+      return false;
+    }
+  });
+
   const [state, setState] = useState<ETRAAppState>(() => loadStoredState());
   const [activeTab, setActiveTab] = useState<'dashboard' | 'gantt' | 'clients' | 'preventive_audit' | 'audit' | 'manual'>('preventive_audit');
   const [showDataModal, setShowDataModal] = useState(false);
@@ -33,6 +45,16 @@ export default function App() {
     const timer = setTimeout(() => setIsAutoSaved(true), 1500);
     return () => clearTimeout(timer);
   }, [state]);
+
+  // Logout / Lock Portal handler
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem('etra_auth_session');
+    } catch {
+      // ignore
+    }
+    setIsAuthenticated(false);
+  };
 
   // Update a single micro-task
   const handleUpdateMicroTask = (macroId: string, updatedTask: MicroTask) => {
@@ -125,7 +147,7 @@ export default function App() {
     });
   };
 
-  // Update client
+  // Client Handlers: Update, Add, Delete
   const handleUpdateClient = (updatedClient: Client) => {
     setState(prev => ({
       ...prev,
@@ -133,11 +155,44 @@ export default function App() {
     }));
   };
 
-  // Add new client
   const handleAddClient = (newClient: Client) => {
     setState(prev => ({
       ...prev,
       clients: [...prev.clients, newClient],
+    }));
+  };
+
+  const handleDeleteClient = (clientId: string) => {
+    setState(prev => {
+      const remainingClients = prev.clients.filter(c => c.id !== clientId);
+      const newSelectedId = prev.selectedClientId === clientId ? 'all' : prev.selectedClientId;
+      return {
+        ...prev,
+        clients: remainingClients,
+        selectedClientId: newSelectedId,
+      };
+    });
+  };
+
+  // Package Tiers & Services Handlers (Customizable Directly on Portal)
+  const handleUpdateRetainerTiers = (tiers: RetainerTier[]) => {
+    setState(prev => ({
+      ...prev,
+      retainerTiers: tiers,
+    }));
+  };
+
+  const handleResetRetainerTiers = () => {
+    setState(prev => ({
+      ...prev,
+      retainerTiers: OFFICIAL_RETAINER_TIERS,
+    }));
+  };
+
+  const handleUpdateAvailableServices = (services: EtraServiceDefinition[]) => {
+    setState(prev => ({
+      ...prev,
+      availableServices: services,
     }));
   };
 
@@ -204,6 +259,8 @@ export default function App() {
       selectedPreventiveAuditId: INITIAL_PREVENTIVE_AUDIT_FASANO.id,
       selectedClientId: 'all',
       theme: 'dark',
+      retainerTiers: OFFICIAL_RETAINER_TIERS,
+      availableServices: AVAILABLE_ETRA_SERVICES,
     };
     setState(demoState);
   };
@@ -221,6 +278,11 @@ export default function App() {
     setState(prev => ({ ...prev, selectedClientId: clientId }));
   };
 
+  // If user is not yet authenticated with password "ETRA8581", show luxury entrance gate
+  if (!isAuthenticated) {
+    return <LoginGate onAuthenticated={() => setIsAuthenticated(true)} />;
+  }
+
   const isDark = state.theme === 'dark';
 
   return (
@@ -237,6 +299,7 @@ export default function App() {
         toggleTheme={toggleTheme}
         onOpenDataModal={() => setShowDataModal(true)}
         isAutoSaved={isAutoSaved}
+        onLogout={handleLogout}
       />
 
       {/* Main Container */}
@@ -273,6 +336,9 @@ export default function App() {
             onSelectClient={handleSelectClient}
             onUpdateClient={handleUpdateClient}
             onAddClient={handleAddClient}
+            onDeleteClient={handleDeleteClient}
+            availableServices={state.availableServices || AVAILABLE_ETRA_SERVICES}
+            onUpdateAvailableServices={handleUpdateAvailableServices}
           />
         )}
 
@@ -298,11 +364,15 @@ export default function App() {
         )}
 
         {activeTab === 'manual' && (
-          <PricingManualView />
+          <PricingManualView
+            retainerTiers={state.retainerTiers || OFFICIAL_RETAINER_TIERS}
+            onUpdateRetainerTiers={handleUpdateRetainerTiers}
+            onResetRetainerTiers={handleResetRetainerTiers}
+          />
         )}
       </main>
 
-      {/* Quiet Footer adhering to anti-slop rules (No fake telemetry tickers) */}
+      {/* Quiet Footer */}
       <footer className="border-t border-[#223049]/60 bg-[#070B12] py-6 text-xs text-neutral-400">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -317,7 +387,7 @@ export default function App() {
             <span>·</span>
             <span>Digital Guest Journey</span>
             <span>·</span>
-            <span>Compliance CIN & EAA 2025</span>
+            <span>Compliance CIN &amp; EAA 2025</span>
           </div>
         </div>
       </footer>
