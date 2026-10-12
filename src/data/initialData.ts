@@ -650,6 +650,29 @@ export const INITIAL_CLIENTS: Client[] = [
         notes: 'Dossier Scheda di Campo completato (25,0% conformità iniziale, 7 voci conformi su 28). Rimborso 100% (€2.800) accreditato a scomputo dal Retainer.',
       },
       {
+        serviceId: 'revenue_management',
+        serviceName: 'Revenue Management Avanzato',
+        status: 'attivo',
+        monthlyFee: 1500,
+        startDate: '2026-10-01',
+        notes: 'In fase di implementazione (setup AI-Driven demand forecasting)',
+      },
+      {
+        serviceId: 'brand_positioning',
+        serviceName: 'Brand Positioning & Marketing',
+        status: 'pianificato',
+        monthlyFee: 2000,
+        startDate: '2026-11-01',
+        notes: 'Da avviare dopo la conclusione del setup Revenue',
+      }
+    ]
+  },
+  {
+    id: 'retainer_full_growth',
+    name: 'Retainer: Full Growth (Consigliato)',
+    status: 'attivo',
+    services: [
+      {
         serviceId: 'retainer_full_growth',
         serviceName: 'Retainer: Full Growth (Consigliato)',
         status: 'attivo',
